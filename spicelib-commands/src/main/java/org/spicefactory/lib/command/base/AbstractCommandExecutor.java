@@ -135,7 +135,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	}
 
 	private void commandCompleteHandler(CommandResultEvent e) {
-
+		//
 	}
 
 	private class CommandCancelHandler implements EventListener<CommandResultEvent> {
