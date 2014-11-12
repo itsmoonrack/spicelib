@@ -1,5 +1,6 @@
 package org.spicefactory.lib.command.base;
 
+<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spicefactory.lib.command.AsyncCommand;
@@ -21,11 +22,19 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private volatile boolean active;
+=======
+/**
+ * Abstract
+ * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ */
+public class AbstractAsyncCommand {
+>>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 	protected AbstractAsyncCommand() {
 		//		Java 8:
 		//		addEventListener(CommandEvent.CANCEL, e -> active = false);
@@ -36,10 +45,13 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 		});
 	}
 
+=======
+>>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 	/////////////////////////////////////////////////////////////////////////////
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 	/**
 	 * Starts the execution of this command. If this command is member of a group or a flow this method should not be called by application code.
 	 */
@@ -107,4 +119,9 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 	 * </p>
 	 */
 	protected abstract void doExecute();
+=======
+	/////////////////////////////////////////////////////////////////////////////
+	// Internal implementation.
+	/////////////////////////////////////////////////////////////////////////////
+>>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 }

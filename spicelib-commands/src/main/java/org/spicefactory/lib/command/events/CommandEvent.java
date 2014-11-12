@@ -29,8 +29,13 @@ public class CommandEvent extends Event {
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 	public CommandEvent(int id) {
 		super(id);
+=======
+	public CommandEvent(Object source, int id) {
+		super(source, id);
+>>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 	}
 
 	public Object command() {
