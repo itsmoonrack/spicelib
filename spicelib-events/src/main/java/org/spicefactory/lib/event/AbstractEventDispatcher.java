@@ -13,7 +13,6 @@ import java.util.Vector;
  */
 public abstract class AbstractEventDispatcher<L extends EventListener<E>, E extends Event> implements EventDispatcher<L> {
 
-<<<<<<< HEAD
 	private final Object source;
 	private final Map<Integer, Vector<L>> listenersByType = new HashMap<Integer, Vector<L>>();
 
@@ -27,13 +26,10 @@ public abstract class AbstractEventDispatcher<L extends EventListener<E>, E exte
 		this.source = source;
 	}
 
-=======
-	private final Map<Integer, Vector<L>> listenersByType = new HashMap<Integer, Vector<L>>();
-
->>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 	/* (non-Javadoc)
 	 * @see org.spicefactory.parsley.core.events.EventDispatcher#addEventListener(L)
 	 */
+	@Override
 	public synchronized void addEventListener(int type, L l) {
 		if (l == null) {
 			throw new NullPointerException();
@@ -52,6 +48,7 @@ public abstract class AbstractEventDispatcher<L extends EventListener<E>, E exte
 	/* (non-Javadoc)
 	 * @see org.spicefactory.parsley.core.events.EventDispatcher#removeEventListener(L)
 	 */
+	@Override
 	public synchronized void removeEventListener(int type, L l) {
 		Vector<L> listeners = listenersByType.get(type);
 
@@ -65,11 +62,8 @@ public abstract class AbstractEventDispatcher<L extends EventListener<E>, E exte
 	@SuppressWarnings("unchecked")
 	protected void dispatchEvent(E e) {
 		Vector<L> listeners;
-<<<<<<< HEAD
 		// Sets the source object to this event.
 		e.setSource(source);
-=======
->>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 
 		if (listenersByType.containsKey(e.getID())) {
 			listeners = listenersByType.get(e.getID());
