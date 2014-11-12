@@ -32,20 +32,17 @@ public class CommandResultEvent extends CommandEvent implements CommandResult {
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
 	public CommandResultEvent(int id, Object result) {
 		super(id);
-=======
-	public CommandResultEvent(Object source, int id, Object result) {
-		super(source, id);
->>>>>>> 412b0bf9089695734842bd015015227b1c3ab71a
 		this.result = result;
 	}
 
+	@Override
 	public Object value() {
 		return result;
 	}
 
+	@Override
 	public boolean complete() {
 		return id == COMPLETE;
 	}
