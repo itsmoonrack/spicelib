@@ -86,21 +86,21 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 	 * Signals an error condition and cancels the command. Subclasses should call this method when the asynchronous operation cannot be
 	 * successfully completed.
 	 */
-	protected void error() {
-		error(null);
+	protected void exception() {
+		exception(null);
 	}
 
 	/**
-	 * Signals an error condition and cancels the command. Subclasses should call this method when the asynchronous operation cannot be
+	 * Signals an exception condition and cancels the command. Subclasses should call this method when the asynchronous operation cannot be
 	 * successfully completed.
 	 */
-	protected final void error(Throwable result) {
+	protected final void exception(Throwable result) {
 		if (!isActive()) {
 			logger.error("Attempt to dispatch error event for command '{}' although it is not active.", this);
 			return;
 		}
 		active = false;
-		dispatchEvent(new CommandResultEvent(CommandResultEvent.ERROR, result));
+		dispatchEvent(new CommandResultEvent(CommandResultEvent.EXCEPTION, result));
 	}
 
 	/**

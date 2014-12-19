@@ -213,7 +213,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 		EventListener[] listenersGroup = new EventListener[3];
 		command.addEventListener(CommandResultEvent.COMPLETE, listenersGroup[0] = new CommandCompleteHandler());
-		command.addEventListener(CommandResultEvent.ERROR, listenersGroup[1] = new CommandErrorHandler());
+		command.addEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1] = new CommandErrorHandler());
 		command.addEventListener(CommandEvent.CANCEL, listenersGroup[2] = new CommandCancelHandler());
 
 		listeners.put(command, listenersGroup);
@@ -227,7 +227,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 		EventListener[] listenersGroup = listeners.get(command);
 		command.removeEventListener(CommandResultEvent.COMPLETE, listenersGroup[0]);
-		command.removeEventListener(CommandResultEvent.ERROR, listenersGroup[1]);
+		command.removeEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1]);
 		command.removeEventListener(CommandEvent.CANCEL, listenersGroup[2]);
 	}
 
@@ -258,7 +258,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 			commandComplete(DefaultCommandResult.forException(command, cause));
 		} else {
 			doCancel();
-			error(new CommandException(this, command, cause));
+			exception(new CommandException(this, command, cause));
 		}
 	}
 

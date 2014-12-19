@@ -20,7 +20,7 @@ public class CommandResultEvent extends CommandEvent implements CommandResult {
 	/**
 	 * Constant for the type of event fired when a command aborted with an error.
 	 */
-	public static final int ERROR = 0x16;
+	public static final int EXCEPTION = 0x16;
 
 	private final Object result;
 
