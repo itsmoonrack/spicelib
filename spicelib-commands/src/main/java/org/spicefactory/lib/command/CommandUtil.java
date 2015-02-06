@@ -2,7 +2,7 @@ package org.spicefactory.lib.command;
 
 /**
  * Utility methods for determining the capabilities of a target command.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public final class CommandUtil {
 

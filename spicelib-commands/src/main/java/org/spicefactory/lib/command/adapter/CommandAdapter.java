@@ -4,7 +4,7 @@ import org.spicefactory.lib.command.CommandExecutor;
 
 /**
  * Represents an adapter for a command type that does not implement one of the command interfaces.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandAdapter extends CommandExecutor {
 

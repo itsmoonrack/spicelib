@@ -2,7 +2,7 @@ package org.spicefactory.lib.command;
 
 /**
  * Represents the result of a command execution
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandResult {
 

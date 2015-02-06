@@ -14,7 +14,7 @@ import org.spicefactory.lib.event.EventListener;
  * A subclass of AbstractAsyncCommand is expected to override the <code>doStart</code> method, do its work and then call <code>complete</code>
  * when the operation is done (or <code>error</code> when the command fails to complete successfully).
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<EventListener<CommandEvent>, CommandEvent> implements AsyncCommand {
 
@@ -26,6 +26,9 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates a new instance.
+	 */
 	protected AbstractAsyncCommand() {
 		//		Java 8:
 		//		addEventListener(CommandEvent.CANCEL, e -> active = false);

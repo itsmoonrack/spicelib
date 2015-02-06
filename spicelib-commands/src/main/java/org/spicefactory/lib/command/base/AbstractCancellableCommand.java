@@ -10,7 +10,7 @@ import org.spicefactory.lib.command.events.CommandEvent;
  * <code>complete</code> when the operation is done (or <code>error</code> when the command fails to complete successfully). It is also expected
  * to override the <code>doCancel</code> method to cancel the actual operation.
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public abstract class AbstractCancellableCommand extends AbstractAsyncCommand implements CancellableCommand {
 
@@ -22,6 +22,7 @@ public abstract class AbstractCancellableCommand extends AbstractAsyncCommand im
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
+	@Override
 	public void cancel() {
 		if (!isActive()) {
 			logger.error("Attempt to suspend inactive command '{}'", this);

@@ -19,6 +19,7 @@ import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandException;
 import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.command.lifecycle.CommandLifecycle;
+import org.spicefactory.lib.command.lifecycle.DefaultCommandLifecycle;
 import org.spicefactory.lib.event.EventListener;
 
 /**
@@ -27,12 +28,9 @@ import org.spicefactory.lib.event.EventListener;
  * It knows how to execute other commands and deal with their events. Subclasses are expected to call the protected <code>executeCommand</code>
  * method to start a command and override the protected template method <code>commandComplete</code> for dealing with the result.
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand implements CommandExecutor {
-
-	private boolean processErrors;
-	private boolean processCancellations;
 
 	/** The life-cycle hook to use for the commands executed by this instance. */
 	private CommandLifecycle lifecycle;
@@ -41,6 +39,29 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	/** The active commands list. */
 	private final List<Command> activeCommands = new LinkedList<Command>();
+
+	private final boolean processErrors;
+	private final boolean processCancellations;
+
+	/**
+	 * Creates a new instance.
+	 */
+	protected AbstractCommandExecutor() {
+		this(false, false);
+	}
+
+	/**
+	 * Creates a new instance.
+	 * @param description a description of this command
+	 * @param processErrors if true an error in a command executed by this instance leads to commandComplete getting called, if false the
+	 *            executor will stop with an error result
+	 * @param processCancellations if true the cancellation of a command executed by this instance leads to commandComplete getting called, if
+	 *            false the executor will stop with an error result
+	 */
+	protected AbstractCommandExecutor(boolean processErrors, boolean processCancellations) {
+		this.processErrors = processErrors;
+		this.processCancellations = processCancellations;
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Public API.
@@ -98,7 +119,9 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	 * </p>
 	 * @return a new life-cycle instance to use when executing commands
 	 */
-	protected abstract CommandLifecycle createLifecycle();
+	protected CommandLifecycle createLifecycle() {
+		return new DefaultCommandLifecycle();
+	}
 
 	protected CommandLifecycle lifecycle() {
 		if (lifecycle == null) {

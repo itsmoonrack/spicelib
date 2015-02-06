@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Represents the data produced by commands, usually inside a group or flow.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandData {
 

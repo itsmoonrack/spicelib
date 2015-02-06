@@ -11,7 +11,7 @@ import org.spicefactory.lib.command.data.CommandData;
  * A typical example is integration into an IOC container where the command is supposed to be managed by the container for the time it is getting
  * executed and where the creation of the command instance may also be managed by the container. But this in entirely generic hook that can be
  * used for any kind of additional functionality.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandLifecycle {
 

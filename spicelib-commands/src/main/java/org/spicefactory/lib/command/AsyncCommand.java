@@ -9,7 +9,7 @@ import org.spicefactory.lib.event.annotation.Events;
 
 /**
  * Represents a command that executes asynchronously.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 @Events({@Event(type = CommandResultEvent.class, id = CommandResultEvent.COMPLETE),
 		@Event(type = CommandResultEvent.class, id = CommandResultEvent.COMPLETE)})

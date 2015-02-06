@@ -9,7 +9,7 @@ import org.spicefactory.lib.command.lifecycle.CommandLifecycle;
  * This is the base interface for all command types that group, link or proxy other commands. Since these commands may implement any of the
  * optional <code>Command</code> sub-interface, this interface introduces properties that determine the capabilities of this executor.
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandExecutor extends SuspendableCommand {
 

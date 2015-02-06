@@ -6,7 +6,7 @@ import org.spicefactory.lib.command.proxy.CommandProxy;
  * Represents a builder that produces command proxies.
  * <p>
  * Most classes of the builder API implement this interfaces.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandBuilder {
 

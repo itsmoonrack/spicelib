@@ -3,7 +3,7 @@ package org.spicefactory.lib.command.adapter;
 
 /**
  * Represents a factory for command adapters.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandAdapterFactory {
 

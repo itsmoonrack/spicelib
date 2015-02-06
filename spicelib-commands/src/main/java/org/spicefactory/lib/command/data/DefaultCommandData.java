@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * Default implementation of the CommandData interface.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public class DefaultCommandData implements CommandData {
 

@@ -6,7 +6,7 @@ import org.spicefactory.lib.event.annotation.Events;
 
 /**
  * Represents a command that can get cancelled and suspended.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 @Events({@Event(type = CommandEvent.class, id = CommandEvent.SUSPEND), @Event(type = CommandEvent.class, id = CommandEvent.RESUME)})
 public interface SuspendableCommand extends CancellableCommand {

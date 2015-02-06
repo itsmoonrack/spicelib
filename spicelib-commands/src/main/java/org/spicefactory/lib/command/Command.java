@@ -9,7 +9,7 @@ package org.spicefactory.lib.command;
  * This interface is used by all internal command executors and builders. But application classes do not have to implement this interface when
  * they use the Light Command functionality where execution is based on naming conventions instead.
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface Command {
 

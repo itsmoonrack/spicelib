@@ -6,7 +6,7 @@ import org.spicefactory.lib.command.CommandResult;
  * Event dispatched by commands when they finished executing.
  * <p>
  * This event also implements the <code>CommandResult</code> interface.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public class CommandResultEvent extends CommandEvent implements CommandResult {
 

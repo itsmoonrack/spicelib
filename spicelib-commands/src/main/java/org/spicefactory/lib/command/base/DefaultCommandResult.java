@@ -4,7 +4,7 @@ import org.spicefactory.lib.command.CommandResult;
 
 /**
  * Default implementation of the CommandResult interface.
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public class DefaultCommandResult implements CommandResult {
 

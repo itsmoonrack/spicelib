@@ -8,7 +8,7 @@ import org.spicefactory.lib.command.CommandExecutor;
  * <p>
  * A proxy is usually used to wrap additional functionality around a command, like timeout handling for example.
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public interface CommandProxy extends CommandExecutor {
 

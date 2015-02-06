@@ -10,7 +10,7 @@ import org.spicefactory.lib.command.events.CommandEvent;
  * <code>doResume</code> methods and perform the necessary operations, and then call <code>complete</code> when the operation is done (or
  * <code>error</code> when the command fails to complete successfully).
  * </p>
- * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
 public abstract class AbstractSuspendableCommand extends AbstractCancellableCommand implements SuspendableCommand {
 
@@ -24,6 +24,7 @@ public abstract class AbstractSuspendableCommand extends AbstractCancellableComm
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
+	@Override
 	public void suspend() {
 		if (!isActive()) {
 			logger.error("Attempt to suspend inactive command '{}'.", this);
@@ -38,6 +39,7 @@ public abstract class AbstractSuspendableCommand extends AbstractCancellableComm
 		dispatchEvent(new CommandEvent(CommandEvent.SUSPEND));
 	}
 
+	@Override
 	public void resume() {
 		if (!isSuspended()) {
 			logger.error("Attempt to resume command '{}' which is not suspended.", this);
@@ -48,6 +50,7 @@ public abstract class AbstractSuspendableCommand extends AbstractCancellableComm
 		dispatchEvent(new CommandEvent(CommandEvent.RESUME));
 	}
 
+	@Override
 	public final boolean isSuspended() {
 		return suspended;
 	}
