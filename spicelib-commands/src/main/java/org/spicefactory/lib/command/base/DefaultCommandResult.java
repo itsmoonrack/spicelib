@@ -62,7 +62,7 @@ public class DefaultCommandResult implements CommandResult {
 	}
 
 	@Override
-	public Object value() {
+	public Object getValue() {
 		return value;
 	}
 

@@ -13,8 +13,8 @@ import org.spicefactory.lib.command.base.AbstractCommandExecutor;
  * cancelled or suspended the currently active child command will also be cancelled or suspended in turn.
  * </p>
  * <p>
- * If a child command throws an <code>ERROR</code> event and the <code>skipErrors</code> property of this sequence is set to false, then the
- * sequence will fire an <code>ERROR</code> event and will not execute its remaining child commands.
+ * If a child command throws an <code>EXCEPTION</code> event and the <code>skipExceptions</code> property of this sequence is set to false, then
+ * the sequence will fire an <code>EXCEPTION</code> event and will not execute its remaining child commands.
  * </p>
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
@@ -33,13 +33,13 @@ public class CommandSequence extends AbstractCommandExecutor implements CommandG
 
 	/**
 	 * Creates a new sequence.
-	 * @param skipErrors if true an error in a command executed by this instance leads to commandComplete getting called, if false the executor
-	 *            will stop with an error result
+	 * @param skipExceptions if true an error in a command executed by this instance leads to commandComplete getting called, if false the
+	 *            executor will stop with an exception
 	 * @param skipCancelllations if true the cancellation of a command executed by this instance leads to commandComplete getting called, if
 	 *            false the executor will stop with an error result
 	 */
-	public CommandSequence(boolean skipErrors, boolean skipCancellations) {
-		super(skipErrors, skipCancellations);
+	public CommandSequence(boolean skipExceptions, boolean skipCancellations) {
+		super(skipExceptions, skipCancellations);
 	}
 
 	@Override

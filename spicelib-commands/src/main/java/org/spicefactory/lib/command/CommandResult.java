@@ -14,7 +14,7 @@ public interface CommandResult {
 	/**
 	 * The actual result value.
 	 */
-	Object value();
+	Object getValue();
 
 	/**
 	 * Whether the command completed successfully.

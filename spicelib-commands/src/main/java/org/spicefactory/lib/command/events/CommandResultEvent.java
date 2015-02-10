@@ -38,7 +38,7 @@ public class CommandResultEvent extends CommandEvent implements CommandResult {
 	}
 
 	@Override
-	public Object value() {
+	public Object getValue() {
 		return result;
 	}
 

@@ -35,12 +35,13 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	/** The life-cycle hook to use for the commands executed by this instance. */
 	private CommandLifecycle lifecycle;
 
-	protected DefaultCommandData data;
+	private DefaultCommandData data;
+	private final List<Object> values = new LinkedList<Object>();
 
 	/** The active commands list. */
 	private final List<Command> activeCommands = new LinkedList<Command>();
 
-	private final boolean processErrors;
+	private final boolean processExceptions;
 	private final boolean processCancellations;
 
 	/**
@@ -53,19 +54,31 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	/**
 	 * Creates a new instance.
 	 * @param description a description of this command
-	 * @param processErrors if true an error in a command executed by this instance leads to commandComplete getting called, if false the
-	 *            executor will stop with an error result
+	 * @param processExceptions if true an error in a command executed by this instance leads to commandComplete getting called, if false the
+	 *            executor will stop with an exception
 	 * @param processCancellations if true the cancellation of a command executed by this instance leads to commandComplete getting called, if
 	 *            false the executor will stop with an error result
 	 */
-	protected AbstractCommandExecutor(boolean processErrors, boolean processCancellations) {
-		this.processErrors = processErrors;
+	protected AbstractCommandExecutor(boolean processExceptions, boolean processCancellations) {
+		this.processExceptions = processExceptions;
 		this.processCancellations = processCancellations;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Adds a value to this executor that can get passed to any command executed by this instance.
+	 * @param value the value to add to this executor
+	 */
+	public void addData(Object value) {
+		if (data != null) {
+			data.addValue(value);
+		} else {
+			values.add(value);
+		}
+	}
 
 	@Override
 	public void suspend() {
@@ -107,6 +120,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	public void prepare(CommandLifecycle lifecycle, CommandData data) {
 		this.lifecycle = lifecycle;
 		this.data = new DefaultCommandData(data);
+		addValues();
 	}
 
 	/**
@@ -123,11 +137,52 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		return new DefaultCommandLifecycle();
 	}
 
-	protected CommandLifecycle lifecycle() {
+	/**
+	 * The data associated with this executor.
+	 * <p>
+	 * Contains any results from previously executed commands or data specified upfront.
+	 * </p>
+	 * @return
+	 */
+	protected CommandData getData() {
+		if (data == null) {
+			CommandData newData = createData();
+			data = (newData instanceof DefaultCommandData) ? (DefaultCommandData) newData : new DefaultCommandData(data);
+			addValues();
+		}
+
+		return data;
+	}
+
+	/**
+	 * The life-cycle hook to use for the commands executed by this instance.
+	 */
+	protected CommandLifecycle getLifecycle() {
 		if (lifecycle == null) {
 			lifecycle = createLifecycle();
 		}
 		return lifecycle;
+	}
+
+	/**
+	 * Creates a new instance holding the data commands executed by this instance will produce.
+	 * <p>
+	 * Subclasses may override this method to provide specialized implementations.
+	 * <p>
+	 * This method will only get invoked when the first command executed by this instance gets started without the <code>prepare</code> method
+	 * being invoked up-front. The <code>prepare</code> method allows to pass down <code>CommandData</code> instances from the environment (like
+	 * parent executors), in which case this instance should not use its own implementations.
+	 * @return a new instance to use for holding the data commands executed by this instance will produce
+	 */
+	protected CommandData createData() {
+		return new DefaultCommandData();
+	}
+
+	private void addValues() {
+		for (Object value : values) {
+			data.addValue(value);
+		}
+		values.clear();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -266,18 +321,18 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	private void commandCompleteHandler(CommandResultEvent event) {
 		AsyncCommand command = (AsyncCommand) event.getSource();
 		removeActiveCommand(command, event);
-		data.addValue(event.value());
+		data.addValue(event.getValue());
 		commandComplete(event);
 	}
 
 	private void commandErrorHandler(CommandResultEvent event) {
 		AsyncCommand command = (AsyncCommand) event.getSource();
 		removeActiveCommand(command, event);
-		commandError(command, (Throwable) event.value());
+		commandError(command, (Throwable) event.getValue());
 	}
 
 	private void commandError(Command command, Throwable cause) {
-		if (processErrors) {
+		if (processExceptions) {
 			commandComplete(DefaultCommandResult.forException(command, cause));
 		} else {
 			doCancel();

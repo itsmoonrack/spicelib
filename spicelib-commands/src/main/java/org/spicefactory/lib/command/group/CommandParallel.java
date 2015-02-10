@@ -18,8 +18,8 @@ import org.spicefactory.lib.command.base.AbstractCommandExecutor;
  * suspended all child commands that are still running will also be cancelled or suspended in turn.
  * </p>
  * <p>
- * If a child command throws an <code>ERROR</code> event and the <code>skipErrors</code> property of this group is set to false, then all child
- * commands that are still running will be cancelled and the group will fire an <code>ERROR</code> event.
+ * If a child command throws an <code>EXCEPTION</code> event and the <code>skipExceptions</code> property of this group is set to false, then all
+ * child commands that are still running will be cancelled and the group will fire an <code>EXCEPTION</code> event.
  * </p>
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
@@ -38,13 +38,13 @@ public class CommandParallel extends AbstractCommandExecutor implements CommandG
 
 	/**
 	 * Creates a new instance.
-	 * @param skipErrors if true an error in a command executed by this instance leads to commandComplete getting called, if false the executor
-	 *            will stop with an error result
+	 * @param skipExceptions if true an error in a command executed by this instance leads to commandComplete getting called, if false the
+	 *            executor will stop with an exception
 	 * @param skipCancelllations if true the cancellation of a command executed by this instance leads to commandComplete getting called, if
 	 *            false the executor will stop with an error result
 	 */
-	public CommandParallel(boolean skipErrors, boolean skipCancellations) {
-		super(skipErrors, skipCancellations);
+	public CommandParallel(boolean skipExceptions, boolean skipCancellations) {
+		super(skipExceptions, skipCancellations);
 	}
 
 	@Override

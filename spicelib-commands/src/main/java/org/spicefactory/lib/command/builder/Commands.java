@@ -17,7 +17,7 @@ public final class Commands {
 	 * </p>
 	 * @return a new builder for the specified command instance
 	 */
-	public static AbstractCommandBuilder wrap(Object command) {
+	public static CommandProxyBuilder wrap(Object command) {
 		return new CommandProxyBuilder(command);
 	}
 
@@ -29,8 +29,24 @@ public final class Commands {
 	 * </p>
 	 * @return a new builder for the specified command type
 	 */
-	public static AbstractCommandBuilder create(Class<?> commandType) {
+	public static CommandProxyBuilder create(Class<?> commandType) {
 		return new CommandProxyBuilder(commandType);
+	}
+
+	/**
+	 * Creates a new builder for commands to be executed as a sequence.
+	 * @return a new builder for commands to be executed as a sequence.
+	 */
+	public static CommandGroupBuilder asSequence() {
+		return new CommandGroupBuilder(true);
+	}
+
+	/**
+	 * Creates a new builder for commands to be executed in parallel.
+	 * @return a new builder for commands to be executed in parallel.
+	 */
+	public static CommandGroupBuilder inParallel() {
+		return new CommandGroupBuilder(false);
 	}
 
 }

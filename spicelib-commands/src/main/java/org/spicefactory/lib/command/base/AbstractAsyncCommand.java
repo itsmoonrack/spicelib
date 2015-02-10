@@ -20,7 +20,7 @@ public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<Event
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private volatile boolean active;
+	private boolean active;
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
