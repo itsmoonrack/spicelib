@@ -73,10 +73,9 @@ public abstract class AbstractEventDispatcher<L extends EventListener<E>, E exte
 				arrLocal = listeners.toArray(arrLocal);
 			}
 
-			for (int i = arrLocal.length - 1; i > 0; i--) {
+			for (int i = 0; i < arrLocal.length; i++) {
 				((L) arrLocal[i]).process(e);
 			}
 		}
 	}
-
 }

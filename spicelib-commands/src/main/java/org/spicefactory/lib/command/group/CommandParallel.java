@@ -1,6 +1,7 @@
 package org.spicefactory.lib.command.group;
 
-import java.util.Vector;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.spicefactory.lib.command.Command;
@@ -26,7 +27,7 @@ import org.spicefactory.lib.command.base.AbstractCommandExecutor;
 public class CommandParallel extends AbstractCommandExecutor implements CommandGroup {
 
 	private final AtomicInteger completed = new AtomicInteger(0);
-	private final Vector<Command> commands = new Vector<Command>();
+	private final List<Command> commands = new LinkedList<Command>();
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.

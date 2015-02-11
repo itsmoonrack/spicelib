@@ -247,12 +247,12 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 		try {
 			lifecycle.beforeExecution(command, data);
-			logger.debug("Executing command {}.", command);
+			logger.debug("Executing command '{}'.", command);
 			command.execute();
 		}
 		catch (Exception e) {
 			activeCommands.remove(command);
-			commandError(command, e);
+			commandException(command, e);
 			return;
 		}
 
@@ -291,8 +291,8 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 		EventListener[] listenersGroup = new EventListener[3];
 		command.addEventListener(CommandResultEvent.COMPLETE, listenersGroup[0] = new CommandCompleteHandler());
-		command.addEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1] = new CommandErrorHandler());
-		command.addEventListener(CommandEvent.CANCEL, listenersGroup[2] = new CommandCancelHandler());
+		command.addEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1] = new CommandExceptionHandler());
+		command.addEventListener(CommandEvent.CANCEL, listenersGroup[2] = new CommandCancelledHandler());
 
 		listeners.put(command, listenersGroup);
 	}
@@ -325,13 +325,13 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		commandComplete(event);
 	}
 
-	private void commandErrorHandler(CommandResultEvent event) {
+	private void commandExceptionHandler(CommandResultEvent event) {
 		AsyncCommand command = (AsyncCommand) event.getSource();
 		removeActiveCommand(command, event);
-		commandError(command, (Throwable) event.getValue());
+		commandException(command, (Throwable) event.getValue());
 	}
 
-	private void commandError(Command command, Throwable cause) {
+	private void commandException(Command command, Throwable cause) {
 		if (processExceptions) {
 			commandComplete(DefaultCommandResult.forException(command, cause));
 		} else {
@@ -361,16 +361,16 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	}
 
-	private class CommandErrorHandler implements EventListener<CommandResultEvent> {
+	private class CommandExceptionHandler implements EventListener<CommandResultEvent> {
 
 		@Override
 		public void process(CommandResultEvent event) {
-			commandErrorHandler(event);
+			commandExceptionHandler(event);
 		}
 
 	}
 
-	private class CommandCancelHandler implements EventListener<CommandEvent> {
+	private class CommandCancelledHandler implements EventListener<CommandEvent> {
 
 		@Override
 		public void process(CommandEvent event) {

@@ -1,6 +1,7 @@
 package org.spicefactory.lib.command.group;
 
-import java.util.Vector;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.spicefactory.lib.command.Command;
 import org.spicefactory.lib.command.CommandResult;
@@ -21,7 +22,7 @@ import org.spicefactory.lib.command.base.AbstractCommandExecutor;
 public class CommandSequence extends AbstractCommandExecutor implements CommandGroup {
 
 	private int currentIndex; // This does not need synchronization/concurrent access.
-	private final Vector<Command> commands = new Vector<Command>();
+	private final List<Command> commands = new LinkedList<Command>();
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
@@ -65,11 +66,11 @@ public class CommandSequence extends AbstractCommandExecutor implements CommandG
 
 	private void nextCommand() {
 		if (commands.size() == currentIndex) {
-			logger.info("Completed all commands in {}.", this);
+			logger.info("Completed all commands in {}.", getClass());
 			complete();
 		} else {
 			Command command = commands.get(currentIndex);
-			logger.info("Executing next command {} in sequence {}.", command, this);
+			logger.info("Executing next command '{}' in sequence {}.", command, getClass());
 			executeCommand(command);
 		}
 	}

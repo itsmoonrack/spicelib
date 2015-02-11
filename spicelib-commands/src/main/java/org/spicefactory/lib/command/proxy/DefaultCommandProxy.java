@@ -4,7 +4,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.spicefactory.lib.command.Command;
-import org.spicefactory.lib.command.adapter.CommandAdapterFactory;
+import org.spicefactory.lib.command.CommandResult;
+import org.spicefactory.lib.command.adapter.CommandAdapters;
 import org.spicefactory.lib.command.base.AbstractCommandExecutor;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandException;
@@ -12,15 +13,13 @@ import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.command.events.CommandTimeoutException;
 import org.spicefactory.lib.event.EventListener;
 
-public class DefaultCommandProxy extends AbstractCommandExecutor implements CommandProxy, EventListener<CommandEvent> {
+public class DefaultCommandProxy extends AbstractCommandExecutor implements CommandProxy {
 
 	private long delay;
 	private Timer timer;
 	private Class<?> type;
 	private Command target;
-
-	/** Optional factory dependency. */
-	protected CommandAdapterFactory factory;
+	private String description;
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
@@ -31,11 +30,13 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 	/////////////////////////////////////////////////////////////////////////////
 
 	public DefaultCommandProxy() {
-		addEventListener(CommandResultEvent.COMPLETE, this);
-		addEventListener(CommandResultEvent.EXCEPTION, this);
-		addEventListener(CommandEvent.CANCEL, this);
-		addEventListener(CommandEvent.SUSPEND, this);
-		addEventListener(CommandEvent.RESUME, this);
+		// Java 1.8:
+		//addEventListener(CommandResultEvent.COMPLETE, scheduleTimer());
+		addEventListener(CommandResultEvent.COMPLETE, new CommandInactive());
+		addEventListener(CommandResultEvent.EXCEPTION, new CommandInactive());
+		addEventListener(CommandEvent.CANCEL, new CommandInactive());
+		addEventListener(CommandEvent.SUSPEND, new CommandInactive());
+		addEventListener(CommandEvent.RESUME, new CommandActive());
 	}
 
 	/**
@@ -68,6 +69,13 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 		target = null;
 	}
 
+	/**
+	 * A description of the command executed by this proxy.
+	 */
+	public void setDescription(String value) {
+		description = value;
+	}
+
 	@Override
 	public Command getTarget() {
 		return target;
@@ -78,21 +86,6 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 	/////////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public void process(CommandEvent event) {
-		switch (event.getID()) {
-			case CommandEvent.RESUME:
-				scheduleTimer();
-				break;
-			case CommandEvent.CANCEL:
-			case CommandEvent.SUSPEND:
-			case CommandResultEvent.COMPLETE:
-			case CommandResultEvent.EXCEPTION:
-				cancelTimer();
-				break;
-		}
-	}
-
-	@Override
 	protected void doExecute() {
 		if (target == null && type == null) {
 			throw new IllegalStateException("Either target or type property must be set.");
@@ -100,7 +93,7 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 		if (target == null) {
 			try {
 				Object command = getLifecycle().createInstance(type, getData());
-				target = command instanceof Command ? (Command) command : factory.createAdapter(command);
+				target = command instanceof Command ? (Command) command : CommandAdapters.createAdapter(command);
 			}
 			catch (Throwable cause) {
 				exception(new CommandException(this, target, cause));
@@ -109,6 +102,11 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 		}
 		executeCommand(target);
 		scheduleTimer();
+	}
+
+	@Override
+	protected void commandComplete(CommandResult result) {
+		complete(result.getValue());
 	}
 
 	private void scheduleTimer() {
@@ -130,13 +128,38 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 			doCancel();
 			exception(new CommandException(this, target, new CommandTimeoutException(delay)));
 		} else {
-			logger.error("Internal error: timeout in command '{0}' although it is not active.", this);
+			logger.error("Internal error: timeout in command '{0}' although it is not active.", target);
 		}
 		timer = null;
 	}
 
 	private void cancelTimer() {
-		timer.cancel();
-		timer = null;
+		if (timer != null) {
+			timer.cancel();
+			timer = null;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return description != null ? description : target != null ? target.toString() : "LazyCommandProxy[" + type.toString() + "]";
+	}
+	// Java 1.6 legacy for Java 1.8.
+	private class CommandInactive implements EventListener<CommandEvent> {
+
+		@Override
+		public void process(CommandEvent event) {
+			cancelTimer();
+		}
+
+	}
+
+	private class CommandActive implements EventListener<CommandEvent> {
+
+		@Override
+		public void process(CommandEvent event) {
+			scheduleTimer();
+		}
+
 	}
 }
