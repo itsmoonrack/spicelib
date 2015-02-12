@@ -3,10 +3,12 @@ package org.spicefactory.lib.command.builder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.group.CommandGroup;
 import org.spicefactory.lib.command.group.CommandParallel;
 import org.spicefactory.lib.command.group.CommandSequence;
 import org.spicefactory.lib.command.proxy.CommandProxy;
+import org.spicefactory.lib.event.EventListener;
 
 /**
  * A builder DSL for creating CommandGroup instances.
@@ -73,6 +75,44 @@ public class CommandGroupBuilder extends AbstractCommandBuilder {
 	 */
 	public CommandGroupBuilder data(Object value) {
 		addData(value);
+		return this;
+	}
+
+	/**
+	 * Adds a callback to invoke when the command group completes successfully.
+	 * <p>
+	 * An instance of <code>CommandResult</code> will get passed to the callback holding all results produced by the commands in the group.
+	 * @param callback the callback to invoke when the command group completes successfully
+	 * @return this builder instance for method chaining
+	 */
+	public CommandGroupBuilder allResults(EventListener<CommandEvent> callback) {
+		addResultCallback(callback);
+		return this;
+	}
+
+	/**
+	 * Adds a callback to invoke when the command group produced an exception.
+	 * <p>
+	 * The cause of the error will get passed to the callback.
+	 * </p>
+	 * @param callback the callback to invoke when the command group produced an error
+	 * @return this builder instance for method chaining
+	 */
+	public CommandGroupBuilder exception(EventListener<CommandEvent> callback) {
+		addExceptionCallback(callback);
+		return this;
+	}
+
+	/**
+	 * Adds a callback to invoke when the command group gets cancelled.
+	 * <p>
+	 * The callback should not expect any parameters.
+	 * </p>
+	 * @param callback the callback to invoke when the command group gets cancelled
+	 * @return this builder instance for method chaining
+	 */
+	public CommandGroupBuilder cancel(EventListener<CommandEvent> callback) {
+		addCancelCallback(callback);
 		return this;
 	}
 

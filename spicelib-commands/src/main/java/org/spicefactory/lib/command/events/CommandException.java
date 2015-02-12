@@ -7,6 +7,9 @@ import org.spicefactory.lib.command.CommandExecutor;
 
 public class CommandException extends Exception {
 
+	private final Command target;
+	private final CommandExecutor executor;
+
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
@@ -16,7 +19,17 @@ public class CommandException extends Exception {
 	/////////////////////////////////////////////////////////////////////////////
 
 	public CommandException(CommandExecutor executor, Command target, Throwable cause) {
-		super(MessageFormat.format("Execution of {} failed, target command {} failed.", executor), cause);
+		super(MessageFormat.format("Execution of {0} failed, target command {1} failed.", executor, target), cause);
+		this.executor = executor;
+		this.target = target;
+	}
+
+	public Command getTarget() {
+		return target;
+	}
+
+	public CommandExecutor getExecutor() {
+		return executor;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

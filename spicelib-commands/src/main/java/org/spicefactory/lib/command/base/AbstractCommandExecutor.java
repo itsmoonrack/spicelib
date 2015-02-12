@@ -144,7 +144,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	 * </p>
 	 * @return
 	 */
-	protected CommandData getData() {
+	protected DefaultCommandData getData() {
 		if (data == null) {
 			CommandData newData = createData();
 			data = (newData instanceof DefaultCommandData) ? (DefaultCommandData) newData : new DefaultCommandData(data);
@@ -246,7 +246,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		}
 
 		try {
-			lifecycle.beforeExecution(command, data);
+			getLifecycle().beforeExecution(command, data);
 			logger.debug("Executing command '{}'.", command);
 			command.execute();
 		}
@@ -259,7 +259,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		if (!(command instanceof AsyncCommand)) {
 			activeCommands.remove(command);
 			CommandResult result = DefaultCommandResult.forCompletion(command, null);
-			lifecycle.afterCompletion(command, result);
+			getLifecycle().afterCompletion(command, result);
 			commandComplete(result);
 		}
 	}
@@ -321,7 +321,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	private void commandCompleteHandler(CommandResultEvent event) {
 		AsyncCommand command = (AsyncCommand) event.getSource();
 		removeActiveCommand(command, event);
-		data.addValue(event.getValue());
+		getData().addValue(event.getValue());
 		commandComplete(event);
 	}
 
