@@ -1,6 +1,9 @@
 package org.spicefactory.lib.command.builder;
 
 import org.spicefactory.lib.command.Command;
+import org.spicefactory.lib.command.callback.CancelCallback;
+import org.spicefactory.lib.command.callback.ExceptionCallback;
+import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.command.proxy.CommandProxy;
@@ -74,8 +77,16 @@ public abstract class AbstractCommandBuilder implements CommandBuilder {
 	 * The result produced by the command will get passed to the callback.
 	 * @param callback the callback to invoke when the target command completes successfully
 	 */
-	protected void addResultCallback(EventListener<CommandEvent> callback) {
-		proxy.addEventListener(CommandResultEvent.COMPLETE, callback);
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	// Java 1.8 forward-compatibility.
+	protected <T> void addResultCallback(final ResultCallback<T> callback) {
+		EventListener l = new EventListener<CommandResultEvent>() {
+			@Override
+			public void process(CommandResultEvent event) {
+				callback.result((T) event.getValue());
+			}
+		};
+		proxy.addEventListener(CommandResultEvent.COMPLETE, l);
 	}
 
 	/**
@@ -84,8 +95,16 @@ public abstract class AbstractCommandBuilder implements CommandBuilder {
 	 * The cause of the exception will be passed to the callback.
 	 * @param callback the callback to invoke when the target command raised an exception
 	 */
-	protected void addExceptionCallback(EventListener<CommandEvent> callback) {
-		proxy.addEventListener(CommandResultEvent.EXCEPTION, callback);
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	// Java 1.8 forward-compatibility.
+	protected <T extends Throwable> void addExceptionCallback(final ExceptionCallback<T> callback) {
+		EventListener l = new EventListener<CommandResultEvent>() {
+			@Override
+			public void process(CommandResultEvent event) {
+				callback.exception((T) event.getValue());
+			}
+		};
+		proxy.addEventListener(CommandResultEvent.EXCEPTION, l);
 	}
 
 	/**
@@ -94,8 +113,16 @@ public abstract class AbstractCommandBuilder implements CommandBuilder {
 	 * The callback should not expect any parameters.
 	 * @param callback the callback to invoke when the target command gets cancelled
 	 */
-	protected void addCancelCallback(EventListener<CommandEvent> callback) {
-		proxy.addEventListener(CommandResultEvent.CANCEL, callback);
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	// Java 1.8 forward-compatibility.
+	protected void addCancelCallback(final CancelCallback callback) {
+		EventListener l = new EventListener<CommandEvent>() {
+			@Override
+			public void process(CommandEvent event) {
+				callback.cancel();
+			}
+		};
+		proxy.addEventListener(CommandEvent.CANCEL, l);
 	}
 
 	/**

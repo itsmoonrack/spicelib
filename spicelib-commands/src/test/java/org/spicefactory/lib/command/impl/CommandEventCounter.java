@@ -12,15 +12,36 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.spicefactory.lib.command.AsyncCommand;
+import org.spicefactory.lib.command.callback.CancelCallback;
+import org.spicefactory.lib.command.callback.ExceptionCallback;
+import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.event.EventListener;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class CommandEventCounter {
 
-	public final ResultCallback resultCallback = new ResultCallback();
-	public final ExceptionCallback exceptionCallback = new ExceptionCallback();
-	public final CancelCallback cancelCallback = new CancelCallback();
+	public final ResultCallback<Object> resultCallback = new ResultCallback<Object>() {
+		@Override
+		public void result(Object result) {
+			resultCallback(result);
+		}
+	};
+	public final ExceptionCallback<Throwable> exceptionCallback = new ExceptionCallback<Throwable>() {
+		@Override
+		public void exception(Throwable e) {
+			exceptionCallback(e);
+		}
+	};
+	public final CancelCallback cancelCallback = new CancelCallback() {
+		@Override
+		public void cancel() {
+			cancelCallback();
+		}
+	};
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
@@ -153,24 +174,4 @@ public class CommandEventCounter {
 		}
 	}
 
-	private class ResultCallback implements EventListener<CommandEvent> {
-		@Override
-		public void process(CommandEvent event) {
-			resultCallback(((CommandResultEvent) event).getValue());
-		}
-	}
-
-	private class ExceptionCallback implements EventListener<CommandEvent> {
-		@Override
-		public void process(CommandEvent event) {
-			exceptionCallback(((CommandResultEvent) event).getValue());
-		}
-	}
-
-	private class CancelCallback implements EventListener<CommandEvent> {
-		@Override
-		public void process(CommandEvent event) {
-			cancelCallback();
-		}
-	}
 }

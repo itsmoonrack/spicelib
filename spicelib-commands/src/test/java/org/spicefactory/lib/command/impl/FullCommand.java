@@ -5,6 +5,9 @@ import static org.junit.Assert.assertThat;
 
 import org.spicefactory.lib.command.base.AbstractSuspendableCommand;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class FullCommand extends AbstractSuspendableCommand {
 
 	public Integer executions = 0;

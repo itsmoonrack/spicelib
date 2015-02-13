@@ -7,8 +7,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.spicefactory.lib.command.builder.CommandGroupBuilder;
 import org.spicefactory.lib.command.builder.Commands;
 import org.spicefactory.lib.command.events.CommandException;
@@ -20,7 +18,9 @@ import org.spicefactory.lib.command.impl.FullCommand;
 import org.spicefactory.lib.command.impl.SynchronousCommand;
 import org.spicefactory.lib.command.proxy.CommandProxy;
 
-@RunWith(MockitoJUnitRunner.class)
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class CommandGroupTest {
 
 	@Test

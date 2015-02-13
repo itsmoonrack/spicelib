@@ -2,6 +2,9 @@ package org.spicefactory.lib.command.impl;
 
 import org.spicefactory.lib.command.Command;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class SynchronousCommand implements Command {
 
 	public static int totalExecutions = 0;

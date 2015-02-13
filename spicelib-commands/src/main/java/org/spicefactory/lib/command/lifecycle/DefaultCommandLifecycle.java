@@ -16,6 +16,7 @@ public class DefaultCommandLifecycle implements CommandLifecycle {
 	@Override
 	public <T> T createInstance(Class<T> type, CommandData data) {
 		try {
+
 			// Do not support constructor with parameters.
 			return type.newInstance();
 		}

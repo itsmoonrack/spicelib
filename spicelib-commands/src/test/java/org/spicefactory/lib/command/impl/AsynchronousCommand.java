@@ -1,16 +1,31 @@
 package org.spicefactory.lib.command.impl;
 
 import org.spicefactory.lib.command.base.AbstractAsyncCommand;
+import org.spicefactory.lib.command.model.CommandModel;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class AsynchronousCommand extends AbstractAsyncCommand {
 
 	public int executions = 0;
 	public int completions = 0;
 	public int exceptions = 0;
 
+	public final Object injection;
+
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
+
+	public AsynchronousCommand() {
+		this.injection = null;
+	}
+
+	public AsynchronousCommand(CommandModel optionalInjection) {
+		this.injection = optionalInjection.value;
+		optionalInjection.markAsInjected();
+	}
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Public API.

@@ -9,8 +9,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.spicefactory.lib.command.builder.CommandProxyBuilder;
 import org.spicefactory.lib.command.builder.Commands;
 import org.spicefactory.lib.command.events.CommandException;
@@ -21,7 +19,9 @@ import org.spicefactory.lib.command.impl.FullCommand;
 import org.spicefactory.lib.command.impl.SynchronousCommand;
 import org.spicefactory.lib.command.proxy.CommandProxy;
 
-@RunWith(MockitoJUnitRunner.class)
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class CommandExecutionTest {
 
 	@Test

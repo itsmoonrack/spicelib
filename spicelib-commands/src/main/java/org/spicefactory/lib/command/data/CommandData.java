@@ -25,7 +25,7 @@ public interface CommandData {
 	 * @param type the type of the result to return
 	 * @return the last result added to this instance with a matching type.
 	 */
-	Object getObject(Class<?> type);
+	<T> T getObject(Class<T> type);
 
 	/**
 	 * Returns all results.
@@ -46,6 +46,6 @@ public interface CommandData {
 	 * @param type the type of the results to return (if omitted all types are included)
 	 * @return an Array holding all matching results that were added to this instance.
 	 */
-	List<Object> getObjects(Class<?> type);
+	<T> List<T> getObjects(Class<T> type);
 
 }

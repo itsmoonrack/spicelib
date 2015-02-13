@@ -242,11 +242,11 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		}
 
 		if (command instanceof CommandExecutor) {
-			((CommandExecutor) command).prepare(lifecycle, data);
+			((CommandExecutor) command).prepare(getLifecycle(), getData());
 		}
 
 		try {
-			getLifecycle().beforeExecution(command, data);
+			getLifecycle().beforeExecution(command, getData());
 			logger.debug("Executing command '{}'.", command);
 			command.execute();
 		}
@@ -285,10 +285,6 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addListeners(AsyncCommand command) {
-		//		command.addEventListener(CommandResultEvent.COMPLETE, e -> commandCompleteHandler(e)); // Java 8
-		//		command.addEventListener(CommandResultEvent.ERROR, e -> commandErrorHandler(e)); // Java 8
-		//		command.addEventListener(CommandEvent.CANCEL, e -> commandCancelHandler(e)); // Java 8
-
 		EventListener[] listenersGroup = new EventListener[3];
 		command.addEventListener(CommandResultEvent.COMPLETE, listenersGroup[0] = new CommandCompleteHandler());
 		command.addEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1] = new CommandExceptionHandler());
@@ -299,10 +295,6 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void removeListeners(AsyncCommand command) {
-		//		command.removeEventListener(CommandResultEvent.COMPLETE, e -> commandCompleteHandler(e)); // Java 8
-		//		command.removeEventListener(CommandResultEvent.ERROR, e -> commandErrorHandler(e)); // Java 8
-		//		command.removeEventListener(CommandEvent.CANCEL, e -> commandCancelHandler(e)); // Java 8
-
 		EventListener[] listenersGroup = listeners.get(command);
 		command.removeEventListener(CommandResultEvent.COMPLETE, listenersGroup[0]);
 		command.removeEventListener(CommandResultEvent.EXCEPTION, listenersGroup[1]);
@@ -351,7 +343,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 		}
 	}
 
-	// Java 1.6 legacy for Java 1.8.
+	// Java 1.8 forward compatibility.
 	private class CommandCompleteHandler implements EventListener<CommandResultEvent> {
 
 		@Override
@@ -361,6 +353,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	}
 
+	// Java 1.8 forward compatibility.
 	private class CommandExceptionHandler implements EventListener<CommandResultEvent> {
 
 		@Override
@@ -370,6 +363,7 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 
 	}
 
+	// Java 1.8 forward compatibility.
 	private class CommandCancelledHandler implements EventListener<CommandEvent> {
 
 		@Override

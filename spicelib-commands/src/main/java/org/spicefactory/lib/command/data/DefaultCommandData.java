@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class DefaultCommandData implements CommandData {
 
-	private final List<Object> data = new LinkedList<Object>();
+	private final List<Object> data = new ArrayList<Object>();
 	private final CommandData parent;
 
 	private volatile boolean inProgress; // TODO: Check the purpose of inProgress, concurrency ?
@@ -50,24 +50,28 @@ public class DefaultCommandData implements CommandData {
 	// Public API.
 	/////////////////////////////////////////////////////////////////////////////
 
+	@Override
 	public Object getObject() {
 		return getObject(Object.class);
 	}
 
-	public Object getObject(Class<?> type) {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getObject(Class<T> type) {
 		if (inProgress) {
 			return null;
 		}
 
 		try {
 			inProgress = true;
-			for (Object value : data) {
-				if (value.getClass().isAssignableFrom(type)) {
-					return value;
+			for (int i = data.size() - 1; i >= 0; i--) {
+				Object value = data.get(i);
+				if (type.isAssignableFrom(value.getClass())) {
+					return (T) value;
 				} else if (value instanceof CommandData) {
 					Object result = ((CommandData) value).getObject(type);
 					if (result != null) {
-						return result;
+						return (T) result;
 					}
 				}
 			}
@@ -78,23 +82,26 @@ public class DefaultCommandData implements CommandData {
 		}
 	}
 
+	@Override
 	public List<Object> getObjects() {
 		return getObjects(Object.class);
 	}
 
-	public List<Object> getObjects(Class<?> type) {
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> List<T> getObjects(Class<T> type) {
 		if (inProgress) {
-			return new ArrayList<Object>(0);
+			return new ArrayList<T>(0);
 		}
 
-		List<Object> results = new LinkedList<Object>();
+		List<T> results = new LinkedList<T>();
 		try {
 			inProgress = true;
 			for (Object value : data) {
 				if (value instanceof CommandData) {
 					results.addAll(((CommandData) value).getObjects(type));
-				} else if (value.getClass().isAssignableFrom(type)) {
-					results.add(value);
+				} else if (type.isAssignableFrom(value.getClass())) {
+					results.add((T) value);
 				}
 			}
 			if (parent != null) {

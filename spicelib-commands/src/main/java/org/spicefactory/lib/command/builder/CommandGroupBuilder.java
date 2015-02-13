@@ -3,12 +3,14 @@ package org.spicefactory.lib.command.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.spicefactory.lib.command.events.CommandEvent;
+import org.spicefactory.lib.command.callback.CancelCallback;
+import org.spicefactory.lib.command.callback.ExceptionCallback;
+import org.spicefactory.lib.command.callback.ResultCallback;
+import org.spicefactory.lib.command.data.CommandData;
 import org.spicefactory.lib.command.group.CommandGroup;
 import org.spicefactory.lib.command.group.CommandParallel;
 import org.spicefactory.lib.command.group.CommandSequence;
 import org.spicefactory.lib.command.proxy.CommandProxy;
-import org.spicefactory.lib.event.EventListener;
 
 /**
  * A builder DSL for creating CommandGroup instances.
@@ -81,11 +83,34 @@ public class CommandGroupBuilder extends AbstractCommandBuilder {
 	/**
 	 * Adds a callback to invoke when the command group completes successfully.
 	 * <p>
+	 * The result produced by the last command in the group will get passed to the callback.
+	 * <p>
+	 * It is not recommended to use this callback in case of parallel execution as the type of result passed to the callback might be different
+	 * for each execution.
+	 * @param callback the callback to invoke when the command group completes successfully
+	 * @return this builder instance for method chaining
+	 */
+	@SuppressWarnings("unchecked")
+	// Java 1.8 forward-compatibility.
+	public <T> AbstractCommandBuilder lastResult(final ResultCallback<T> callback) {
+		ResultCallback<CommandData> function = new ResultCallback<CommandData>() {
+			@Override
+			public void result(CommandData data) {
+				callback.result((T) data.getObject());
+			}
+		};
+		addResultCallback(function);
+		return this;
+	}
+
+	/**
+	 * Adds a callback to invoke when the command group completes successfully.
+	 * <p>
 	 * An instance of <code>CommandResult</code> will get passed to the callback holding all results produced by the commands in the group.
 	 * @param callback the callback to invoke when the command group completes successfully
 	 * @return this builder instance for method chaining
 	 */
-	public CommandGroupBuilder allResults(EventListener<CommandEvent> callback) {
+	public <T> CommandGroupBuilder allResults(final ResultCallback<T> callback) {
 		addResultCallback(callback);
 		return this;
 	}
@@ -98,7 +123,7 @@ public class CommandGroupBuilder extends AbstractCommandBuilder {
 	 * @param callback the callback to invoke when the command group produced an error
 	 * @return this builder instance for method chaining
 	 */
-	public CommandGroupBuilder exception(EventListener<CommandEvent> callback) {
+	public CommandGroupBuilder exception(ExceptionCallback<? super Throwable> callback) {
 		addExceptionCallback(callback);
 		return this;
 	}
@@ -111,7 +136,7 @@ public class CommandGroupBuilder extends AbstractCommandBuilder {
 	 * @param callback the callback to invoke when the command group gets cancelled
 	 * @return this builder instance for method chaining
 	 */
-	public CommandGroupBuilder cancel(EventListener<CommandEvent> callback) {
+	public CommandGroupBuilder cancel(CancelCallback callback) {
 		addCancelCallback(callback);
 		return this;
 	}

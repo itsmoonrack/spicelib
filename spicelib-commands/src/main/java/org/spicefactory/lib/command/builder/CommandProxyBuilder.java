@@ -1,9 +1,10 @@
 package org.spicefactory.lib.command.builder;
 
-import org.spicefactory.lib.command.events.CommandEvent;
+import org.spicefactory.lib.command.callback.CancelCallback;
+import org.spicefactory.lib.command.callback.ExceptionCallback;
+import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.proxy.CommandProxy;
 import org.spicefactory.lib.command.proxy.DefaultCommandProxy;
-import org.spicefactory.lib.event.EventListener;
 
 /**
  * A builder DSL for creating CommandProxy instances, responsible for executing a single command.
@@ -61,7 +62,7 @@ public class CommandProxyBuilder extends AbstractCommandBuilder {
 	 * @param callback the callback to invoke when the command completes successfully
 	 * @return this builder instance for method chaining
 	 */
-	public CommandProxyBuilder result(EventListener<CommandEvent> callback) {
+	public CommandProxyBuilder result(ResultCallback<?> callback) {
 		addResultCallback(callback);
 		return this;
 	}
@@ -74,7 +75,7 @@ public class CommandProxyBuilder extends AbstractCommandBuilder {
 	 * @param callback the callback to invoke when the command produced an error
 	 * @return this builder instance for method chaining
 	 */
-	public CommandProxyBuilder exception(EventListener<CommandEvent> callback) {
+	public CommandProxyBuilder exception(ExceptionCallback<?> callback) {
 		addExceptionCallback(callback);
 		return this;
 	}
@@ -87,7 +88,7 @@ public class CommandProxyBuilder extends AbstractCommandBuilder {
 	 * @param callback the callback to invoke when the command gets cancelled
 	 * @return this builder instance for method chaining
 	 */
-	public CommandProxyBuilder cancel(EventListener<CommandEvent> callback) {
+	public CommandProxyBuilder cancel(CancelCallback callback) {
 		addCancelCallback(callback);
 		return this;
 	}
