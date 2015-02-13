@@ -21,6 +21,9 @@ import org.spicefactory.lib.command.impl.FullCommand;
 import org.spicefactory.lib.command.impl.SynchronousCommand;
 import org.spicefactory.lib.command.proxy.CommandProxy;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class CommandExecutionTest {
 

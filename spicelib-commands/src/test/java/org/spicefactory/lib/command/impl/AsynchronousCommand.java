@@ -2,6 +2,9 @@ package org.spicefactory.lib.command.impl;
 
 import org.spicefactory.lib.command.base.AbstractAsyncCommand;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class AsynchronousCommand extends AbstractAsyncCommand {
 
 	public int executions = 0;

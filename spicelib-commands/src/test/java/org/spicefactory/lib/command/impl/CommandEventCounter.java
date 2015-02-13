@@ -16,6 +16,9 @@ import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.event.EventListener;
 
+/**
+ * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
+ */
 public class CommandEventCounter {
 
 	public final ResultCallback resultCallback = new ResultCallback();
