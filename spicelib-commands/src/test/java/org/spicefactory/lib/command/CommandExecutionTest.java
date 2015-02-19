@@ -22,6 +22,10 @@ import org.spicefactory.lib.command.proxy.CommandProxy;
 /**
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
+<<<<<<< HEAD
+=======
+@RunWith(MockitoJUnitRunner.class)
+>>>>>>> branch 'master' of https://github.com/sylvainlecoy/spicelib.git
 public class CommandExecutionTest {
 
 	@Test
