@@ -5,9 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
@@ -17,7 +15,6 @@ import org.spicefactory.lib.command.builder.Commands;
 import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.data.CommandData;
 import org.spicefactory.lib.command.impl.AsynchronousCommand;
-import org.spicefactory.lib.command.model.CommandModel;
 
 /**
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
@@ -83,20 +80,20 @@ public class CommandDataTest {
 		assertThat(data.getObject(Date.class), notNullValue());
 	}
 
-	@Test
-	public void testInjection() {
-		// Given
-		CommandModel model = new CommandModel("foo");
-		AsynchronousCommand com1 = new AsynchronousCommand();
-
-		// When
-		Commands.asSequence().add(com1).create(AsynchronousCommand.class).execute();
-
-		// Then
-		assertFalse(model.isInjected());
-		com1.forceCompletion(model);
-		assertTrue(model.isInjected());
-	}
+	//	@Test
+	//	public void testInjection() {
+	//		// Given
+	//		CommandModel model = new CommandModel("foo");
+	//		AsynchronousCommand com1 = new AsynchronousCommand();
+	//
+	//		// When
+	//		Commands.asSequence().add(com1).create(AsynchronousCommand.class).execute();
+	//
+	//		// Then
+	//		assertFalse(model.isInjected());
+	//		com1.forceCompletion(model);
+	//		assertTrue(model.isInjected());
+	//	}
 
 	private class ResultHandler implements ResultCallback<String> {
 

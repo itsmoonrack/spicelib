@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.spicefactory.lib.command.AsyncCommand;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandResultEvent;
-import org.spicefactory.lib.event.AbstractEventDispatcher;
+import org.spicefactory.lib.event.EventDispatcher;
 import org.spicefactory.lib.event.EventListener;
 
 /**
@@ -16,7 +16,7 @@ import org.spicefactory.lib.event.EventListener;
  * </p>
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
-public abstract class AbstractAsyncCommand extends AbstractEventDispatcher<EventListener<CommandEvent>, CommandEvent> implements AsyncCommand {
+public abstract class AbstractAsyncCommand extends EventDispatcher<EventListener<CommandEvent>, CommandEvent> implements AsyncCommand {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 

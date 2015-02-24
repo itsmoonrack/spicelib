@@ -2,7 +2,7 @@ package org.spicefactory.lib.command;
 
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandResultEvent;
-import org.spicefactory.lib.event.EventDispatcher;
+import org.spicefactory.lib.event.IEventDispatcher;
 import org.spicefactory.lib.event.EventListener;
 import org.spicefactory.lib.event.annotation.Event;
 import org.spicefactory.lib.event.annotation.Events;
@@ -13,7 +13,7 @@ import org.spicefactory.lib.event.annotation.Events;
  */
 @Events({@Event(type = CommandResultEvent.class, id = CommandResultEvent.COMPLETE),
 		@Event(type = CommandResultEvent.class, id = CommandResultEvent.COMPLETE)})
-public interface AsyncCommand extends Command, EventDispatcher<EventListener<CommandEvent>> {
+public interface AsyncCommand extends Command, IEventDispatcher<EventListener<CommandEvent>> {
 
 	/**
 	 * Indicates whether this command is currently executing.

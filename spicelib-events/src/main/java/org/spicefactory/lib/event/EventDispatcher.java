@@ -1,24 +1,81 @@
 package org.spicefactory.lib.event;
 
-public interface EventDispatcher<L extends EventListener<?>> {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
-	/**
-	 * Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event.
-	 * <p>
-	 * If you no longer need an event listener, remove it by calling removeEventListener(), or memory problems could result. Event listeners are
-	 * not automatically removed from memory because the garbage collector does not remove the listener as long as the dispatching object exists.
-	 * <p>
-	 * Copying an EventDispatcher instance does not copy the event listeners attached to it. (If your newly created node needs an event listener,
-	 * you must attach the listener after creating the node.) However, if you move an EventDispatcher instance, the event listeners attached to
-	 * it move along with it.
-	 * @param l The listener class that processes the event
+/**
+ * This class represents an event dispatcher object, or "data" in the model-view paradigm. It can be sub-classed to represent an object that the
+ * application wants to have observed.
+ * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
+ * @param <L>
+ * @param <E>
+ */
+public abstract class EventDispatcher<L extends EventListener<E>, E extends Event> implements IEventDispatcher<L> {
+
+	private final Object source;
+	private final Map<Integer, Vector<L>> listenersByType = new HashMap<Integer, Vector<L>>();
+
+	// Used when extending this class.
+	protected EventDispatcher() {
+		this.source = this;
+	}
+
+	// Used when composing this class so the source object is not this support but the actual dispatcher.
+	protected EventDispatcher(Object source) {
+		this.source = source;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.spicefactory.parsley.core.events.EventDispatcher#addEventListener(L)
 	 */
-	void addEventListener(int type, L l);
+	@Override
+	public synchronized void addEventListener(int type, L l) {
+		if (l == null) {
+			throw new NullPointerException();
+		}
 
-	/**
-	 * Removes the specified event listener so it no longer receives events from this implementation.
-	 * @param l
+		Vector<L> listeners = listenersByType.get(type);
+
+		if (listeners == null) {
+			listeners = new Vector<L>();
+			listenersByType.put(type, listeners);
+		}
+
+		listeners.addElement(l);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.spicefactory.parsley.core.events.EventDispatcher#removeEventListener(L)
 	 */
-	void removeEventListener(int type, L l);
+	@Override
+	public synchronized void removeEventListener(int type, L l) {
+		Vector<L> listeners = listenersByType.get(type);
 
+		if (listeners == null) {
+			return;
+		}
+
+		listeners.removeElement(l);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void dispatchEvent(E e) {
+		Vector<L> listeners;
+		// Sets the source object to this event.
+		e.setSource(source);
+
+		if (listenersByType.containsKey(e.getID())) {
+			listeners = listenersByType.get(e.getID());
+			Object[] arrLocal = new Object[listeners.size()];
+
+			synchronized (this) {
+				arrLocal = listeners.toArray(arrLocal);
+			}
+
+			for (int i = 0; i < arrLocal.length; i++) {
+				((L) arrLocal[i]).process(e);
+			}
+		}
+	}
 }
