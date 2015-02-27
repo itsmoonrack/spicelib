@@ -74,10 +74,11 @@ public final class CommandAdapters {
 	/////////////////////////////////////////////////////////////////////////////
 
 	private static class FactoryRegistration implements Comparable<FactoryRegistration> {
-		private final CommandAdapterFactory factory;
-		private final int order;
 
-		FactoryRegistration(CommandAdapterFactory factory, int order) {
+		private final int order;
+		private final CommandAdapterFactory factory;
+
+		public FactoryRegistration(CommandAdapterFactory factory, int order) {
 			this.factory = factory;
 			this.order = order;
 		}

@@ -47,7 +47,6 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 	 */
 	public void setTarget(Command value) {
 		target = value;
-		type = null;
 	}
 
 	/**
@@ -66,7 +65,6 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 	 */
 	public void setType(Class<?> value) {
 		type = value;
-		target = null;
 	}
 
 	/**

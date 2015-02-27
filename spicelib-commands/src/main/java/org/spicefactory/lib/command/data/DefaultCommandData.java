@@ -66,7 +66,7 @@ public class DefaultCommandData implements CommandData {
 			inProgress = true;
 			for (int i = data.size() - 1; i >= 0; i--) {
 				Object value = data.get(i);
-				if (type.isAssignableFrom(value.getClass())) {
+				if (value != null && type.isAssignableFrom(value.getClass())) {
 					return (T) value;
 				} else if (value instanceof CommandData) {
 					Object result = ((CommandData) value).getObject(type);
@@ -100,7 +100,7 @@ public class DefaultCommandData implements CommandData {
 			for (Object value : data) {
 				if (value instanceof CommandData) {
 					results.addAll(((CommandData) value).getObjects(type));
-				} else if (type.isAssignableFrom(value.getClass())) {
+				} else if (value != null && type.isAssignableFrom(value.getClass())) {
 					results.add((T) value);
 				}
 			}

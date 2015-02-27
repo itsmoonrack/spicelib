@@ -1,6 +1,7 @@
 package org.spicefactory.lib.command.builder;
 
 import org.spicefactory.lib.command.Command;
+import org.spicefactory.lib.command.adapter.CommandAdapters;
 import org.spicefactory.lib.command.callback.CancelCallback;
 import org.spicefactory.lib.command.callback.ExceptionCallback;
 import org.spicefactory.lib.command.callback.ResultCallback;
@@ -143,7 +144,7 @@ public abstract class AbstractCommandBuilder implements CommandBuilder {
 		} else if (command instanceof Class<?>) {
 			return Commands.create((Class<?>) command).build();
 		} else {
-			return null; // TODO: CommandAdapters implementation.
+			return CommandAdapters.createAdapter(command);
 		}
 	}
 
