@@ -362,7 +362,7 @@ public class CommandGroupTest {
 		assertActive(com2, parallel);
 
 		// When
-		Thread.sleep(500);
+		Thread.sleep(200);
 
 		// Then
 		events.assertEvents(0, 1);

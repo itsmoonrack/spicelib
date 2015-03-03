@@ -79,4 +79,9 @@ public class CommandParallel extends AbstractCommandExecutor implements CommandG
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "CommandParallel" + commands;
+	}
+
 }

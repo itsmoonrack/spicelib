@@ -1,35 +1,26 @@
-package org.spicefactory.lib.command.light;
+package org.spicefactory.lib.command.swing;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.spicefactory.lib.command.CommandResult;
 import org.spicefactory.lib.command.adapter.CommandAdapter;
 import org.spicefactory.lib.command.base.AbstractSuspendableCommand;
 import org.spicefactory.lib.command.base.DefaultCommandResult;
-import org.spicefactory.lib.command.builder.CommandProxyBuilder;
 import org.spicefactory.lib.command.callback.Callback;
-import org.spicefactory.lib.command.callback.CancelCallback;
-import org.spicefactory.lib.command.callback.ExceptionCallback;
-import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.data.CommandData;
 import org.spicefactory.lib.command.data.DefaultCommandData;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandException;
 import org.spicefactory.lib.command.lifecycle.CommandLifecycle;
-import org.spicefactory.lib.command.proxy.CommandProxy;
-import org.spicefactory.lib.command.result.ResultProcessors;
 
-/**
- * In this implementation asynchronous commands execution are blocking the calling thread.
- * <p>
- * If you want non-blocking commands you might implement a command adapter which executes asynchronous command in a new thread pool.
- * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
- */
-class LightCommandAdapter extends AbstractSuspendableCommand implements CommandAdapter {
+class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandAdapter {
 
 	private CommandLifecycle lifecycle;
-	private CommandProxy resultProcessor;
 	private DefaultCommandData data = new DefaultCommandData();
 
 	private final Object target;
@@ -39,12 +30,13 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 	private final Method resultMethod;
 	private final Method exceptionMethod;
 	private final boolean async;
+	private final SwingCommand command;
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
 
-	LightCommandAdapter(Object target, Method execute, Field callback, Method cancel, Method result, Method error, boolean async) {
+	SwingCommandAdapter(Object target, Method execute, Field callback, Method cancel, Method result, Method error, boolean async) {
 		this.target = target;
 		this.callbackField = callback;
 		this.executeMethod = execute;
@@ -52,6 +44,7 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 		this.resultMethod = result;
 		this.exceptionMethod = error;
 		this.async = async;
+		this.command = async ? new SwingCommand() : null;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -100,9 +93,8 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 
 	@Override
 	protected void doCancel() {
-		if (resultProcessor != null) {
-			resultProcessor.cancel();
-			resultProcessor = null;
+		if (command != null) {
+			command.cancel(true);
 		} else {
 			try {
 				cancelMethod.invoke(target);
@@ -129,16 +121,19 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 
 		try {
 			if (async) {
-				executeMethod.invoke(target, getParameters());
+				command.execute();
 			} else {
 				// Result can be null if invoked method return type is void.
 				Object result = executeMethod.invoke(target, getParameters());
 				handleResult(result);
 			}
 		}
+		catch (InvocationTargetException e) {
+			afterCompletion(DefaultCommandResult.forException(target, e.getCause()));
+			exception(e.getCause());
+		}
 		catch (Exception e) {
-			afterCompletion(DefaultCommandResult.forException(target, e));
-			exception(e);
+			throw new Error(e);
 		}
 	}
 
@@ -160,29 +155,18 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 	}
 
 	private void handleResult(Object result) {
-		CommandProxyBuilder builder = result == null ? null : ResultProcessors.newProcessor(target, result);
-		if (builder != null) {
-			processResult(builder);
-		} else {
-			handleCompletion(result);
-		}
-	}
-
-	private void handleCompletion(Object result) {
 		result = invokeResultHandler(resultMethod, result);
 		if (result instanceof Throwable) {
 			handleException((Throwable) result);
 			return;
 		}
 		afterCompletion(DefaultCommandResult.forCompletion(target, result));
-		resultProcessor = null;
 		complete(result);
 	}
 
 	private void handleException(Throwable cause) {
 		cause = (Throwable) invokeResultHandler(exceptionMethod, cause);
 		afterCompletion(DefaultCommandResult.forException(target, cause));
-		resultProcessor = null;
 		exception(cause);
 	}
 
@@ -216,16 +200,28 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 	private void handleCancellation() {
 		// do not call cancel to bypass doCancel
 		afterCompletion(DefaultCommandResult.forCancellation(target));
-		resultProcessor = null;
 		dispatchEvent(new CommandEvent(CommandEvent.CANCEL));
 	}
 
-	private void processResult(CommandProxyBuilder builder) {
-		resultProcessor = builder //
-				.result(commandCompletionCallback) //
-				.exception(commandExceptionCallback) //
-				.cancel(commandCancellationCallback) //
-				.execute();
+	private class SwingCommand extends SwingWorker<Object, Void> {
+
+		@Override
+		protected Object doInBackground() throws Exception {
+			return executeMethod.invoke(target, getParameters());
+		}
+
+		@Override
+		protected void done() {
+			//			try {
+			//				handleResult(get());
+			//			}
+			//			catch (InterruptedException e) {
+			//				handleCancellation();
+			//			}
+			//			catch (ExecutionException e) {
+			//				handleException(e.getCause());
+			//			}
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -234,19 +230,37 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 
 	private final Callback<Object> callback = new Callback<Object>() {
 		@Override
-		public void result(Object result) {
+		public void result(final Object result) {
 			if (!isActive()) {
 				throw new IllegalStateException("Callback invoked although command " + target + " is not active");
 			}
-			handleResult(result);
+			if (SwingUtilities.isEventDispatchThread()) {
+				handleResult(result);
+			} else {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						handleResult(result);
+					}
+				});
+			}
 		}
 
 		@Override
-		public void exception(Throwable result) {
+		public void exception(final Throwable result) {
 			if (!isActive()) {
 				throw new IllegalStateException("Callback invoked although command " + target + " is not active");
 			}
-			handleException(result);
+			if (SwingUtilities.isEventDispatchThread()) {
+				handleException(result);
+			} else {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						handleException(result);
+					}
+				});
+			}
 		}
 
 		@Override
@@ -254,35 +268,17 @@ class LightCommandAdapter extends AbstractSuspendableCommand implements CommandA
 			if (!isActive()) {
 				throw new IllegalStateException("Callback invoked although command " + target + " is not active");
 			}
-			handleCancellation();
+			if (SwingUtilities.isEventDispatchThread()) {
+				handleCancellation();
+			} else {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						handleCancellation();
+					}
+				});
+			}
 		}
-	};
-
-	private final ResultCallback<Object> commandCompletionCallback = new ResultCallback<Object>() {
-
-		@Override
-		public void result(Object result) {
-			handleCompletion(result);
-		}
-
-	};
-
-	private final ExceptionCallback<Throwable> commandExceptionCallback = new ExceptionCallback<Throwable>() {
-
-		@Override
-		public void exception(Throwable cause) {
-			handleException(cause);
-		}
-
-	};
-
-	private final CancelCallback commandCancellationCallback = new CancelCallback() {
-
-		@Override
-		public void cancel() {
-			handleCancellation();
-		}
-
 	};
 
 }

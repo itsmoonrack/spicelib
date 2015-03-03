@@ -1,4 +1,4 @@
-package org.spicefactory.lib.command.light;
+package org.spicefactory.lib.command.swing;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,10 +8,10 @@ import org.spicefactory.lib.command.adapter.CommandAdapterFactory;
 import org.spicefactory.lib.command.callback.Callback;
 
 /**
- * A CommandAdapterFactory implementation that creates adapters from commands that adhere to the conventions of Spicelib's "Light Commands".
+ * A CommandAdapterFactory implementation that creates adapters from commands that adhere to the conventions of Spicelib's "Swing Commands".
  * @author Sylvain Lecoy <sylvain.lecoy@gmail.com>
  */
-public class LightCommandAdapterFactory implements CommandAdapterFactory {
+public class SwingCommandAdapterFactory implements CommandAdapterFactory {
 
 	@Override
 	public CommandAdapter createAdapter(Object instance) {
@@ -61,6 +61,6 @@ public class LightCommandAdapterFactory implements CommandAdapterFactory {
 			// Nothing to do.
 		}
 
-		return new LightCommandAdapter(instance, execute, callback, cancel, result, error, async);
+		return new SwingCommandAdapter(instance, execute, callback, cancel, result, error, async);
 	}
 }

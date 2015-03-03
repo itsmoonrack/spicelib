@@ -140,7 +140,7 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 
 	@Override
 	public String toString() {
-		return description != null ? description : target != null ? target.toString() : "LazyCommandProxy[" + type.toString() + "]";
+		return description != null ? description : target != null ? target.toString() : "LazyCommandProxy(" + type.toString() + ")";
 	}
 	// Java 1.6 legacy for Java 1.8.
 	private class CommandInactive implements EventListener<CommandEvent> {

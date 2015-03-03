@@ -130,6 +130,21 @@ public class CommandEventCounter {
 		return events.containsKey(type) ? events.get(type).intValue() : 0;
 	}
 
+	public List<Object> getResults() {
+		return results;
+	}
+
+	public List<Object> getExceptions() {
+		return exceptions;
+	}
+
+	public Object getResult() {
+		assertThat(eventCount(CommandResultEvent.COMPLETE), equalTo(1));
+		assertThat(resultCallbacks, hasSize(1));
+		assertThat(resultCallbacks.get(0), sameInstance(results.get(0)));
+		return results.get(0);
+	}
+
 	public Object getException() {
 		assertThat(eventCount(CommandResultEvent.EXCEPTION), equalTo(1));
 		assertThat(exceptionCallbacks, hasSize(1));

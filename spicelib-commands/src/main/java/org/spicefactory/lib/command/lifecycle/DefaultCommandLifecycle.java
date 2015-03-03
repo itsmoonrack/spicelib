@@ -42,6 +42,9 @@ public class DefaultCommandLifecycle implements CommandLifecycle {
 			}
 			return type.newInstance();
 		}
+		catch (IllegalStateException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			return null;
 		}

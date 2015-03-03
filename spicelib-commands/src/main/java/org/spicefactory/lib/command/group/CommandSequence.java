@@ -74,4 +74,9 @@ public class CommandSequence extends AbstractCommandExecutor implements CommandG
 			executeCommand(command);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "CommandSequence" + commands;
+	}
 }
