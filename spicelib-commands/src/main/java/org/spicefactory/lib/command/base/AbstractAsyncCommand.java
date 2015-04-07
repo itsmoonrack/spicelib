@@ -32,12 +32,7 @@ public abstract class AbstractAsyncCommand extends EventDispatcher<EventListener
 	protected AbstractAsyncCommand() {
 		//		Java 8:
 		//		addEventListener(CommandEvent.CANCEL, e -> active = false);
-		addEventListener(CommandEvent.CANCEL, new EventListener<CommandEvent>() {
-			@Override
-			public void process(CommandEvent event) {
-				active = false;
-			}
-		});
+		addEventListener(CommandEvent.CANCEL, handleCancellation);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -97,7 +92,7 @@ public abstract class AbstractAsyncCommand extends EventDispatcher<EventListener
 	 * Signals an exception condition and cancels the command. Subclasses should call this method when the asynchronous operation cannot be
 	 * successfully completed.
 	 */
-	protected final void exception(Throwable result) {
+	protected final void exception(Object result) {
 		if (!isActive()) {
 			logger.error("Attempt to dispatch error event for command '{}' although it is not active.", this);
 			return;
@@ -117,4 +112,11 @@ public abstract class AbstractAsyncCommand extends EventDispatcher<EventListener
 	/////////////////////////////////////////////////////////////////////////////
 	// Internal implementation.
 	/////////////////////////////////////////////////////////////////////////////
+
+	private final EventListener<CommandEvent> handleCancellation = new EventListener<CommandEvent>() {
+		@Override
+		public void process(CommandEvent event) {
+			active = false;
+		}
+	};
 }

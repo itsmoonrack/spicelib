@@ -32,11 +32,11 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 	public DefaultCommandProxy() {
 		// Java 1.8:
 		//addEventListener(CommandResultEvent.COMPLETE, scheduleTimer());
-		addEventListener(CommandResultEvent.COMPLETE, new CommandInactive());
-		addEventListener(CommandResultEvent.EXCEPTION, new CommandInactive());
-		addEventListener(CommandEvent.CANCEL, new CommandInactive());
-		addEventListener(CommandEvent.SUSPEND, new CommandInactive());
-		addEventListener(CommandEvent.RESUME, new CommandActive());
+		addEventListener(CommandResultEvent.COMPLETE, commandInactive);
+		addEventListener(CommandResultEvent.EXCEPTION, commandInactive);
+		addEventListener(CommandEvent.CANCEL, commandInactive);
+		addEventListener(CommandEvent.SUSPEND, commandInactive);
+		addEventListener(CommandEvent.RESUME, commandActive);
 	}
 
 	/**
@@ -140,9 +140,11 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 
 	@Override
 	public String toString() {
-		return description != null ? description : target != null ? target.toString() : "LazyCommandProxy(" + type.toString() + ")";
+		return description != null ? description : target != null ? target.toString() : "LazyCommandProxy(" + type.getSimpleName() + ")";
 	}
+
 	// Java 1.6 legacy for Java 1.8.
+	private final CommandInactive commandInactive = new CommandInactive();
 	private class CommandInactive implements EventListener<CommandEvent> {
 
 		@Override
@@ -152,6 +154,7 @@ public class DefaultCommandProxy extends AbstractCommandExecutor implements Comm
 
 	}
 
+	private final CommandActive commandActive = new CommandActive();
 	private class CommandActive implements EventListener<CommandEvent> {
 
 		@Override

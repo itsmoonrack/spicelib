@@ -320,10 +320,10 @@ public abstract class AbstractCommandExecutor extends AbstractSuspendableCommand
 	private void commandExceptionHandler(CommandResultEvent event) {
 		AsyncCommand command = (AsyncCommand) event.getSource();
 		removeActiveCommand(command, event);
-		commandException(command, (Throwable) event.getValue());
+		commandException(command, event.getValue());
 	}
 
-	private void commandException(Command command, Throwable cause) {
+	private void commandException(Command command, Object cause) {
 		if (processExceptions) {
 			commandComplete(DefaultCommandResult.forException(command, cause));
 		} else {

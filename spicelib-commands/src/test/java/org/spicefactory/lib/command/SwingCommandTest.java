@@ -15,8 +15,10 @@ import org.spicefactory.lib.command.adapter.CommandAdapters;
 import org.spicefactory.lib.command.builder.CommandProxyBuilder;
 import org.spicefactory.lib.command.builder.Commands;
 import org.spicefactory.lib.command.events.CommandException;
+import org.spicefactory.lib.command.events.CommandResultEvent;
 import org.spicefactory.lib.command.impl.AsyncResultProcessor;
 import org.spicefactory.lib.command.impl.AsyncSwingCommand;
+import org.spicefactory.lib.command.impl.CancellableSwingCommand;
 import org.spicefactory.lib.command.impl.CommandEventCounter;
 import org.spicefactory.lib.command.impl.CommandWithProcessor;
 import org.spicefactory.lib.command.impl.SyncResultProcessor;
@@ -145,6 +147,22 @@ public class SwingCommandTest {
 	}
 
 	@Test
+	public void testConstructorInjection() {
+		// Given
+		useBuilder(Commands //
+				.create(SyncSwingConstructorInjectionCommand.class) //
+				.data(new CommandModel("foo")) //
+				.data("bar"));
+		assertInactive();
+
+		// When
+		proxy.execute();
+
+		// Then
+		assertResult("foo:bar");
+	}
+
+	@Test
 	public void testConstructorInjectionMissingOptional() {
 		// Given
 		useBuilder(Commands //
@@ -176,7 +194,7 @@ public class SwingCommandTest {
 	}
 
 	@Test
-	public void testAsynchronousCommand() throws InterruptedException {
+	public void testAsynchronousCommand() {
 		// Given
 		AsyncSwingCommand async = new AsyncSwingCommand();
 		build(async);
@@ -184,6 +202,7 @@ public class SwingCommandTest {
 
 		// When
 		proxy.execute();
+		proxy.addEventListener(CommandResultEvent.COMPLETE, async);
 
 		// Then
 		assertActive();
@@ -193,11 +212,72 @@ public class SwingCommandTest {
 
 	@Test
 	public void testCancellationOnTarget() {
+		// Given
+		CancellableSwingCommand async = new CancellableSwingCommand();
+		build(async);
+		assertInactive();
+		proxy.execute();
+		assertActive();
 
+		// When
+		async.cancel();
+
+		// Then
+		assertCancelled();
+	}
+
+	@Test
+	public void testCancellationOnProxy() {
+		// Given
+		build(new CancellableSwingCommand());
+		assertInactive();
+		proxy.execute();
+		assertActive();
+
+		// When
+		proxy.cancel();
+
+		// Then
+		assertCancelled();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testIllegalCancellation() {
+		// Given
+		AsyncSwingCommand async = new AsyncSwingCommand();
+		build(async);
+		assertInactive();
+		proxy.execute();
+		assertActive();
+
+		// When
+		proxy.cancel();
+
+		// Then expect IllegalStateException
+	}
+
+	@Test
+	public void testCreateCommand() {
+		// Given
+		create(AsyncSwingCommand.class);
+		assertInactive();
+
+		// When
+		proxy.execute();
+
+		// Then
+		assertActive();
+		AsyncSwingCommand.lastCreated.invokeCallback("foo");
+		assertCompleted();
 	}
 
 	private void build(Object com) {
 		proxy = prepare(Commands.wrap(com)).build();
+		events.setTarget(proxy);
+	}
+
+	private void create(Class<?> com) {
+		proxy = prepare(Commands.create(com)).build();
 		events.setTarget(proxy);
 	}
 
@@ -244,6 +324,11 @@ public class SwingCommandTest {
 		assertThat(exception.getCause(), is(instanceOf(expectedCause)));
 		assertThat(exception.getExecutor(), sameInstance((CommandExecutor) proxy));
 		assertThat(exception.getTarget(), sameInstance(proxy.getTarget()));
+	}
+
+	private void assertCancelled() {
+		events.assertEvents(0, 0, 1);
+		events.assertCallbacks(0, 0, 1);
 	}
 
 }

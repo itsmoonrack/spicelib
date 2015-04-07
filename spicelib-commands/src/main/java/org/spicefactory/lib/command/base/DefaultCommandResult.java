@@ -44,7 +44,7 @@ public class DefaultCommandResult implements CommandResult {
 	 * @param command the command that failed to execute
 	 * @param cause the cause of the exception
 	 */
-	public static CommandResult forException(Object command, Throwable cause) {
+	public static CommandResult forException(Object command, Object cause) {
 		return new DefaultCommandResult(command, cause, false);
 	}
 

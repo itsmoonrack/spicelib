@@ -110,4 +110,9 @@
 			<artifactId>jsr305</artifactId>
 		</dependency>
 	</dependencies>
+	<parent>
+		<artifactId>sq-parent-pom</artifactId>
+		<groupId>com.swissquote</groupId>
+		<version>14.5.31</version>
+	</parent>
 </project>

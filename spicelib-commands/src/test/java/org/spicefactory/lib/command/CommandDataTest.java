@@ -12,12 +12,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 
 import org.junit.Test;
+import org.spicefactory.lib.command.adapter.CommandAdapters;
 import org.spicefactory.lib.command.builder.CommandGroupBuilder;
 import org.spicefactory.lib.command.builder.Commands;
 import org.spicefactory.lib.command.callback.ResultCallback;
 import org.spicefactory.lib.command.data.CommandData;
 import org.spicefactory.lib.command.impl.AsynchronousCommand;
+import org.spicefactory.lib.command.impl.SyncSwingDataCommand;
+import org.spicefactory.lib.command.impl.SyncSwingResultCommand;
 import org.spicefactory.lib.command.model.CommandModel;
+import org.spicefactory.lib.command.swing.SwingCommandAdapterFactory;
 
 /**
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
@@ -28,7 +32,7 @@ public class CommandDataTest {
 	public void testSingleCommand() {
 		// Given
 		AsynchronousCommand async = new AsynchronousCommand();
-		ResultHandler handler = new ResultHandler();
+		StringResultHandler handler = new StringResultHandler();
 
 		// When
 		Commands.wrap(async).result(handler).execute();
@@ -98,7 +102,31 @@ public class CommandDataTest {
 		assertTrue(model.isInjected());
 	}
 
-	private class ResultHandler implements ResultCallback<String> {
+	@Test
+	public void testSwingCommand() {
+		// Given
+		CommandAdapters.addFactory(new SwingCommandAdapterFactory());
+		SyncSwingResultCommand com1 = new SyncSwingResultCommand(new CommandModel("foo"));
+		SyncSwingDataCommand com2 = new SyncSwingDataCommand();
+		ObjectResultHandler allResultsHandler = new ObjectResultHandler();
+		StringResultHandler lastResultHandler = new StringResultHandler();
+
+		// When
+		Commands.asSequence().add(com1).add(com2).allResults(allResultsHandler).lastResult(lastResultHandler).execute();
+
+		// Then
+		assertThat(lastResultHandler.result, equalTo("foo"));
+		assertThat(allResultsHandler.result, is(instanceOf(CommandData.class)));
+		CommandData data = (CommandData) allResultsHandler.result;
+		assertThat(data.getObject(String.class), equalTo("foo"));
+		assertThat(data.getObject(CommandData.class), notNullValue());
+		assertThat(data.getObjects(), hasSize(2));
+
+		assertTrue(com1.executed);
+		assertThat(com2.model, notNullValue());
+	}
+
+	private class StringResultHandler implements ResultCallback<String> {
 
 		String result;
 

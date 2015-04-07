@@ -4,43 +4,70 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.spicefactory.lib.command.callback.Callback;
+import org.spicefactory.lib.command.Async;
+import org.spicefactory.lib.command.events.CommandEvent;
+import org.spicefactory.lib.event.EventListener;
 
 /**
  * @author Sylvain Lecoy <sylvain.lecoy@swissquote.ch>
  */
-public class AsyncSwingCommand {
+@Async
+public class AsyncSwingCommand implements EventListener<CommandEvent> {
 
-	final Lock lock = new ReentrantLock();
-	final Condition complete = lock.newCondition();
-
-	protected Callback<Object> callback;
+	private final Lock lock = new ReentrantLock();
+	private final Condition race = lock.newCondition();
+	private final Condition execute = lock.newCondition();
+	private final Condition complete = lock.newCondition();
 
 	public static AsyncSwingCommand lastCreated;
 
+	public Object result;
 	public boolean executed;
+	private boolean executing;
 
 	public AsyncSwingCommand() {
 		lastCreated = this;
 	}
 
-	public void execute(Callback<Object> callback) {
-		this.callback = callback;
+	// Executed in SwingWorker thread.
+	public Object execute() throws InterruptedException {
 		try {
 			lock.lock();
-			complete.signal();
+			executing = true;
+			race.signal();
+			execute.await(); // Simulates an asynchronous blocking operation.
 			executed = true;
+			return result;
 		}
 		finally {
 			lock.unlock();
 		}
 	}
 
-	public void invokeCallback(Object param) throws InterruptedException {
+	// Executed in Test thread.
+	public void invokeCallback(Object param) {
 		try {
 			lock.lock();
-			complete.await();
-			callback.result(param);
+			result = param;
+			if (!executing) {
+				race.await(); // Avoids race conditions.
+			}
+			execute.signal();
+			complete.await(); // Blocks the testing thread.
+		}
+		catch (InterruptedException e) {
+
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void process(CommandEvent event) {
+		try {
+			lock.lock();
+			complete.signal(); // Releases the testing thread.
 		}
 		finally {
 			lock.unlock();

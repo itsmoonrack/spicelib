@@ -24,6 +24,10 @@ public class CommandException extends Exception {
 		this.target = target;
 	}
 
+	public CommandException(CommandExecutor executor, Command target, Object exception) {
+		this(executor, target, exception instanceof Throwable ? (Throwable) exception : new ObjectException(exception));
+	}
+
 	public Command getTarget() {
 		return target;
 	}
@@ -32,7 +36,31 @@ public class CommandException extends Exception {
 		return executor;
 	}
 
+	/**
+	 * Use this to get the cause of the exception.
+	 * <p>
+	 * Might not necessary be a Throwable in case of framework exception.
+	 * @return
+	 */
+	public Object getException() {
+		Throwable throwable = getCause();
+		if (throwable instanceof ObjectException) {
+			return ((ObjectException) throwable).exception;
+		}
+		return throwable;
+	}
+
 	/////////////////////////////////////////////////////////////////////////////
 	// Internal implementation.
 	/////////////////////////////////////////////////////////////////////////////
+
+	private static class ObjectException extends Throwable {
+
+		private final Object exception;
+
+		public ObjectException(Object exception) {
+			this.exception = exception;
+		}
+
+	}
 }

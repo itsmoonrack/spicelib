@@ -2,7 +2,10 @@ package org.spicefactory.lib.command.swing;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.spicefactory.lib.command.Async;
 import org.spicefactory.lib.command.adapter.CommandAdapter;
 import org.spicefactory.lib.command.adapter.CommandAdapterFactory;
 import org.spicefactory.lib.command.callback.Callback;
@@ -17,8 +20,8 @@ public class SwingCommandAdapterFactory implements CommandAdapterFactory {
 	public CommandAdapter createAdapter(Object instance) {
 		Method execute = null;
 		Method cancel = null;
-		Method result = null;
-		Method error = null;
+		List<Method> result = new ArrayList<Method>();
+		List<Method> error = new ArrayList<Method>();
 
 		for (Method m : instance.getClass().getMethods()) {
 			if ("execute".equals(m.getName())) {
@@ -28,17 +31,17 @@ public class SwingCommandAdapterFactory implements CommandAdapterFactory {
 				cancel = m;
 			}
 			if ("result".equals(m.getName()) && m.getParameterTypes().length == 1) {
-				result = m;
+				result.add(m);
 			}
 			if ("error".equals(m.getName()) && m.getParameterTypes().length == 1) {
-				error = m;
+				error.add(m);
 			}
 		}
 
 		if (execute == null)
 			return null;
 
-		boolean async = false;
+		boolean async = instance.getClass().isAnnotationPresent(Async.class);
 
 		for (Class<?> param : execute.getParameterTypes()) {
 			if (param.isAssignableFrom(Callback.class)) {
@@ -61,6 +64,7 @@ public class SwingCommandAdapterFactory implements CommandAdapterFactory {
 			// Nothing to do.
 		}
 
-		return new SwingCommandAdapter(instance, execute, callback, cancel, result, error, async);
+		return new SwingCommandAdapter(instance, execute, callback, cancel, result.toArray(new Method[result.size()]),
+				error.toArray(new Method[error.size()]), async);
 	}
 }

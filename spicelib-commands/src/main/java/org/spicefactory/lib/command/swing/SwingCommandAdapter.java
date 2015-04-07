@@ -3,6 +3,9 @@ package org.spicefactory.lib.command.swing;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -11,14 +14,16 @@ import org.spicefactory.lib.command.CommandResult;
 import org.spicefactory.lib.command.adapter.CommandAdapter;
 import org.spicefactory.lib.command.base.AbstractSuspendableCommand;
 import org.spicefactory.lib.command.base.DefaultCommandResult;
+import org.spicefactory.lib.command.builder.CommandProxyBuilder;
 import org.spicefactory.lib.command.callback.Callback;
 import org.spicefactory.lib.command.data.CommandData;
 import org.spicefactory.lib.command.data.DefaultCommandData;
 import org.spicefactory.lib.command.events.CommandEvent;
 import org.spicefactory.lib.command.events.CommandException;
 import org.spicefactory.lib.command.lifecycle.CommandLifecycle;
+import org.spicefactory.lib.command.result.ResultProcessors;
 
-class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandAdapter {
+public class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandAdapter {
 
 	private CommandLifecycle lifecycle;
 	private DefaultCommandData data = new DefaultCommandData();
@@ -27,22 +32,28 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 	private final Field callbackField;
 	private final Method executeMethod;
 	private final Method cancelMethod;
-	private final Method resultMethod;
-	private final Method exceptionMethod;
+	private final Method[] resultMethod;
+	private final Method[] errorMethod;
 	private final boolean async;
 	private final SwingCommand command;
+
+	private static final List<Class<?>> exceptionTypes = new ArrayList<Class<?>>() {
+		{
+			add(Throwable.class);
+		}
+	};
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Package-private.
 	/////////////////////////////////////////////////////////////////////////////
 
-	SwingCommandAdapter(Object target, Method execute, Field callback, Method cancel, Method result, Method error, boolean async) {
+	SwingCommandAdapter(Object target, Method execute, Field callback, Method cancel, Method[] result, Method[] error, boolean async) {
 		this.target = target;
 		this.callbackField = callback;
 		this.executeMethod = execute;
 		this.cancelMethod = cancel;
 		this.resultMethod = result;
-		this.exceptionMethod = error;
+		this.errorMethod = error;
 		this.async = async;
 		this.command = async ? new SwingCommand() : null;
 	}
@@ -70,6 +81,31 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 	@Override
 	public Object getTarget() {
 		return target;
+	}
+
+	/**
+	 * Adds a type of result that should be interpreted as an Exception.
+	 * @param type of result that should be interpreted as an Exception
+	 */
+	public static void addExceptionType(Class<?> type) {
+		exceptionTypes.add(type);
+	}
+
+	/**
+	 * Indicates whether the specified result value represents a known exception type.
+	 * @param result the result instance to check
+	 * @return true if the specified result value represents a known exception type
+	 */
+	public static boolean isExceptionType(Object result) {
+		if (result == null)
+			return false;
+
+		for (Class<?> exceptionType : exceptionTypes) {
+			if (exceptionType.isAssignableFrom(result.getClass()))
+				return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -125,7 +161,7 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 			} else {
 				// Result can be null if invoked method return type is void.
 				Object result = executeMethod.invoke(target, getParameters());
-				handleResult(result);
+				handleCompletion(result);
 			}
 		}
 		catch (InvocationTargetException e) {
@@ -150,24 +186,38 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 		return parameters;
 	}
 
-	private void afterCompletion(CommandResult result) {
-		lifecycle.afterCompletion(target, result);
+	private void handleResult(Object result) {
+		CommandProxyBuilder builder = result != null ? ResultProcessors.newProcessor(target, result) : null;
+		if (builder != null) {
+			processResult(builder);
+		} else {
+			handleCompletion(result);
+		}
 	}
 
-	private void handleResult(Object result) {
+	private void handleCompletion(Object result) {
 		result = invokeResultHandler(resultMethod, result);
-		if (result instanceof Throwable) {
-			handleException((Throwable) result);
+		if (isExceptionType(result)) {
+			handleException(result);
 			return;
 		}
 		afterCompletion(DefaultCommandResult.forCompletion(target, result));
 		complete(result);
 	}
 
-	private void handleException(Throwable cause) {
-		cause = (Throwable) invokeResultHandler(exceptionMethod, cause);
+	private void handleException(Object cause) {
+		cause = invokeResultHandler(errorMethod, cause);
 		afterCompletion(DefaultCommandResult.forException(target, cause));
 		exception(cause);
+	}
+
+	private Object invokeResultHandler(Method[] methods, Object value) {
+		for (Method method : methods) {
+			if (method.getParameterTypes()[0].isAssignableFrom(value.getClass())) {
+				return invokeResultHandler(method, value);
+			}
+		}
+		return value;
 	}
 
 	private Object invokeResultHandler(Method method, Object value) {
@@ -183,8 +233,11 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 				return method.invoke(target, param);
 			}
 		}
-		catch (Throwable t) {
-			return t;
+		catch (InvocationTargetException e) {
+			return e.getCause();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -203,6 +256,14 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 		dispatchEvent(new CommandEvent(CommandEvent.CANCEL));
 	}
 
+	private void processResult(CommandProxyBuilder builder) {
+		System.err.println("SwingCommandAdapter.processResult(TODO: Implement me)");
+	}
+
+	private void afterCompletion(CommandResult result) {
+		lifecycle.afterCompletion(target, result);
+	}
+
 	private class SwingCommand extends SwingWorker<Object, Void> {
 
 		@Override
@@ -212,15 +273,21 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 
 		@Override
 		protected void done() {
-			//			try {
-			//				handleResult(get());
-			//			}
-			//			catch (InterruptedException e) {
-			//				handleCancellation();
-			//			}
-			//			catch (ExecutionException e) {
-			//				handleException(e.getCause());
-			//			}
+			try {
+				Object result = get();
+				if (isExceptionType(result)) {
+					handleException(result);
+				} else {
+					handleResult(result);
+				}
+			}
+			catch (InterruptedException e) {
+				handleCancellation();
+			}
+			catch (ExecutionException e) {
+				Throwable cause = e.getCause();
+				handleException(cause instanceof InvocationTargetException ? cause.getCause() : cause);
+			}
 		}
 	}
 
@@ -235,14 +302,27 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 				throw new IllegalStateException("Callback invoked although command " + target + " is not active");
 			}
 			if (SwingUtilities.isEventDispatchThread()) {
-				handleResult(result);
+				if (isExceptionType(result)) {
+					handleException(result);
+				} else {
+					handleCompletion(result);
+				}
 			} else {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						handleResult(result);
-					}
-				});
+				try {
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							if (isExceptionType(result)) {
+								handleException(result);
+							} else {
+								handleCompletion(result);
+							}
+						}
+					});
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
@@ -254,12 +334,17 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 			if (SwingUtilities.isEventDispatchThread()) {
 				handleException(result);
 			} else {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						handleException(result);
-					}
-				});
+				try {
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							handleException(result);
+						}
+					});
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
@@ -271,12 +356,17 @@ class SwingCommandAdapter extends AbstractSuspendableCommand implements CommandA
 			if (SwingUtilities.isEventDispatchThread()) {
 				handleCancellation();
 			} else {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						handleCancellation();
-					}
-				});
+				try {
+					SwingUtilities.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							handleCancellation();
+						}
+					});
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	};
